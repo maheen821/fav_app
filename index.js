@@ -4,7 +4,9 @@ const path = require('path');
 const conn = require('./db');
 
 const app = express();
-const PORT = 3000;
+
+// ✅ Use dynamic port for Railway
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
@@ -20,11 +22,15 @@ app.post('/submit-form', (req, res) => {
 
   const sql = 'INSERT INTO users (name, email, phone) VALUES (?, ?, ?)';
   conn.query(sql, [name, email, phone], (err, result) => {
-    if (err) throw err;
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).send('<h2>Something went wrong!</h2><a href="/">Go back</a>');
+    }
     res.send('<h2>Form submitted successfully!</h2><a href="/">Go back</a>');
   });
 });
 
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
